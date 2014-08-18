@@ -1,0 +1,8 @@
+{
+   "Statement": [{
+      "Resource":"$resource",
+      "Condition":{
+         "DateLessThan":{"AWS:EpochTime":$expired}
+      }
+   }]
+}
