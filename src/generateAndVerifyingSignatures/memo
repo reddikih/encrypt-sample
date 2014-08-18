@@ -1,3 +1,9 @@
 参考：Javaのチュートリアル
 
 http://docs.oracle.com/javase/tutorial/security/apisign/index.html
+
+チュートリアルで参照されている参考URL：
+
+* Java Cryptography Architecture (JCA) Reference Guide
+ * http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#SecureRandom
+
