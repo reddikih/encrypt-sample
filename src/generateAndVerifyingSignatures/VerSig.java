@@ -6,6 +6,7 @@ import java.security.spec.*;
 
 /**
  * Created by hikida on 2014/08/18.
+ *
  */
 public class VerSig {
     public static void main(String ... args) {

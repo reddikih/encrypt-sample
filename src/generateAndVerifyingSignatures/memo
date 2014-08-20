@@ -1,9 +1,58 @@
-参考：Javaのチュートリアル
+= Javaによるデジタル署名のやりかた =
+
+Javaのチュートリアル（8のだけど）を参考に整理してみた．
+
+== 参考：Javaのチュートリアル ==
 
 http://docs.oracle.com/javase/tutorial/security/apisign/index.html
 
-チュートリアルで参照されている参考URL：
+== チュートリアルで参照されている参考URL ==
 
-* Java Cryptography Architecture (JCA) Reference Guide
- * http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#SecureRandom
+* [http://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#SecureRandom Java Cryptography Architecture (JCA) Reference Guide]
 
+== 署名（暗号化）の手順 ==
+
+{{{
+ここで行う手順は対称暗号（RSA）の鍵ペアもプログラムで生成する場合を表している．
+鍵が既にあるなら検証手順の最初の方で行っているように鍵データを適切な方法でプログラムに読み込むことが必要．
+}}}
+
+1. KeyPairGeneratorを生成
+2. SecureRandomを生成
+ - 暗号化するときの乱数（十分な暗号強度を持つ乱数を生成する？）
+3. KeyPairGeneratorを初期化
+ - 鍵長とSequreRandomを引数にしてKeyPairGenerator.initialize()を呼ぶ
+4. KeyPairから公開鍵と秘密鍵オブジェクトを取得する
+ - !KeyPair, !PrivateKey, !PublicKey
+5. 署名オブジェクトのインスタンスを生成
+ - Signature.getInstance("SHA1withRSA");
+6. 署名したいデータのバイト配列を署名オブジェクトに渡して署名オブジェクトを更新
+ - Signature.update(buffer, 0, buffer.length);
+7. 署名されたバイト配列を取得
+ - byte[] signed = signature.sign();
+8. 署名検証用に使う公開鍵をファイルに出力する
+ - 鍵は通常何らかの形式で表現（エンコード）される．ファイルに出力するときはその表現形式（エンコーディング）で保存する必要がある
+ - 通常はPublicKey.getEncoded()でバイト配列に格納すれば良い
+ - 鍵をJava内部で鍵オブジェクトにロードするときに鍵の符号形式の情報が必要
+
+== 検証（復号化）の手順 ==
+
+1. 検証鍵（公開鍵）と署名ファイルとメッセージを準備（プログラムに読み込む）
+2. 公開鍵をロード
+ - エンコード形式によってロードの仕方が違う（以下はRSAの場合を想定）
+  - pem形式(.pemファイル): PKCS!#1形式(?)のRSA公開鍵
+   - 何か色々とややこしいらしい．チュートリアル（プロバイダは標準のものを使用）ではX509EncodedKeySpecを使用した
+  - der形式(.derファイル): PKCS!#8形式(?)のRSA公開鍵
+   - PKCS8EncodedKeySpecを使う
+ - 鍵仕様(KeySpec)は鍵データの透明な仕様（エンコード形式や何やらをちゃんと把握出来ている）
+3. 公開鍵を生成
+ - KeyFactoryインスタンス（RSA版）を生成
+ - KeyFactory.generatePublic(keySpec)で公開鍵オブジェクトを取得する
+4. Signatureのインスタンスを生成
+ - Signature.getInstance("SHA1withRSA")でインスタンス生成し
+ - Signature.initVerify(pubKey)で初期化する
+5. メッセージをバイトで読み込んで署名を計算する
+ - Signature.update(messageBytes)
+6. 計算した署名と通信で受け取った署名を比較する
+ - 署名ファイルはバイト配列でそのまま受け取ればよい
+ - 検証はSignature.verify(signatureToVerify)でbooleanを受け取って評価できる
